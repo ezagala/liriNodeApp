@@ -4,24 +4,18 @@ var Spotify = require('node-spotify-api');
 var Twitter = require('twitter'); 
 var inquirer = require('inquirer'); 
 var request = require('request');
+var fs = require('fs');
 
 
-Spotify = new Spotify(keys.spotify);
-var client = new Twitter(keys.twitter);
+var spotifyClient = new Spotify(keys.spotify);
+var twitterClient = new Twitter(keys.twitter);
 
-inquirer.prompt([
-{
-    name: "command", 
-    message: "What command would you like to run?", 
-    type: "rawlist",
-    choices: ["My Tweets", "Spotify this song...", "Movie this!", "Do what it says"]
-}
-]).then(function(x){
+var appLogic = function(y) {
 
-    switch(x.command) {
+    switch(y.command || y) {
         case 'My Tweets':
             var params = {screen_name: 'EJZagala'};
-            client.get('statuses/user_timeline', params, function(error, tweets, response) {
+            twitterClient.get('statuses/user_timeline', params, function(error, tweets, response) {
                 if (!error) {
                     for (var i = 0; i < 20; i++) {
                     console.log('Date tweeted: ' + tweets[i].created_at);
@@ -30,14 +24,14 @@ inquirer.prompt([
                 }
             });
         break; 
-        case 'Spotify this song...': 
+        case "Spotify this song...": 
             inquirer.prompt([
                 {
                     name: "songName",
                     message: "What song would you like to look up?"
                 }
             ]).then(function(x){
-                Spotify
+                spotifyClient
                     .search({ type: 'track', query: x.songName})
                     .then(function(response) {
                         console.log(response);
@@ -79,6 +73,27 @@ inquirer.prompt([
 
             })
         break; 
+        case "Do what it says": 
+            fs.readFile('random.txt', function(err, data){
+                if (err) {
+                    console.log(err)
+                }; 
+                var command = data.toString(); 
+                appLogic(command); 
+            })
+        break; 
     }
+}
+
+inquirer.prompt([
+{
+    name: "command", 
+    message: "What command would you like to run?", 
+    type: "rawlist",
+    choices: ["My Tweets", "Spotify this song...", "Movie this!", "Do what it says"]
+}
+]).then(function(x){
+
+    appLogic(x); 
 
 })
