@@ -32,9 +32,14 @@ var appLogic = function(y) {
                 }
             ]).then(function(x){
                 spotifyClient
-                    .search({ type: 'track', query: x.songName})
+                    .search({ type: 'track', query: x.songName, limit: 1})
                     .then(function(response) {
-                        console.log(response);
+                        console.log(`
+                        Song: ${response.tracks.items[0].name}
+                        Album: ${response.tracks.items[0].album.name}
+                        Artist: ${response.tracks.items[0].album.artists[0].name}
+                        Link: ${response.tracks.items[0].album.artists[0].external_urls.spotify}
+                        `)
                     })
                     .catch(function(err) {
                         console.log(err);
